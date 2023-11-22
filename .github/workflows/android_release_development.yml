@@ -1,0 +1,40 @@
+name: Android Build Development Fastlane
+
+on:
+  push:
+    branches:
+      - development
+jobs:
+  build-android-development:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install npm dependencies
+        run: |
+          npm install --legacy-peer-deps
+      - name: Build Android Release
+        run: |
+          sh -c 'cp .env.development .env'
+          cd android && ./gradlew assembleRelease --warning-mode=all
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-release-development.apk
+          path: android/app/build/outputs/apk/release/
+
+  build-android-production:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install npm dependencies
+        run: |
+          npm install --legacy-peer-deps
+      - name: Build Android Release
+        run: |
+          sh -c 'cp .env.production .env'
+          cd android && ./gradlew assembleRelease --warning-mode=all
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-release-production.apk
+          path: android/app/build/outputs/apk/release/

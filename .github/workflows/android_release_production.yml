@@ -1,0 +1,19 @@
+name: Android Build Production Fastlane
+
+on:
+  push:
+    branches:
+      - prod
+  release:
+    types:
+      - published # only run the workflow when a new release has been published
+jobs:
+  android-production:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create, upload android release and increment version code/name.
+        run: |
+          fastlane deploy_production

@@ -1,0 +1,40 @@
+name: iOS Build
+
+on:
+  push:
+    branches:
+      - prod
+  release:
+    types:
+      - published # only run the workflow when a new release has been published
+
+jobs:
+  ios-build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install yarn dependencies
+        run: yarn install
+
+      - name: Install CocoaPods dependencies
+        run: pod install --repo-update --project-directory=ios
+
+      - name: Configure credentials and Create, upload ios build and increment version number
+        env:
+          GITHUB_TOKEN: ${{secrets.TOKEN_GITHUB}}
+          GIT_TERMINAL_PROMPT: 0
+          MATCH_USERNAME: ${{secrets.MATCH_USERNAME}}
+          MATCH_PASSWORD: ${{secrets.MATCH_PASSWORD}}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          IOS_DISTRIBUTION_CERTS_GITHUB_URL: ${{secrets.IOS_DISTRIBUTION_CERTS_GITHUB_URL}}
+        working-directory: ios
+        run: |
+          echo "machine github.com login $GITHUB_TOKEN" >> ~/.netrc
+          rm -rf ./fastlane/report.xml
+          rm -rf ./fastlane/screenshots
+          rm -rf ./fastlane/metadata
+          fastlane release_build scheme:Production

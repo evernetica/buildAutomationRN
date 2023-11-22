@@ -1,0 +1,25 @@
+name: Android Build
+
+on:
+  pull_request:
+    branches:
+      - development
+jobs:
+  build-android:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install npm dependencies
+        run: |
+          npm install --legacy-peer-deps
+      - name: Build Android Release
+        run: |
+          sh -c 'cp .env.development .env'
+          cd android && ./gradlew assembleRelease --warning-mode=all
+
+      - name: Upload Android release and attach with workflow
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-release-development.apk
+          path: android/app/build/outputs/apk/release/
